@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sovereign B2B MCP: private MCP infrastructure, by invitation</title>
+<meta name="description" content="Invite-only, authenticated MCP server on Cloudflare Workers with queued jobs, persistent records and semantic search.">
+<script>document.documentElement.className='js';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eeeae3;--glow:#f7f4ee;--ink:#1c1b19;--muted:#6b675f;--line:#d6d1c7;--accent:#3d5a47;--accent-ink:#f4f1ea;--panel:#f7f4ee;--scrim:rgba(238,234,227,.82);
+  color-scheme:light;box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151513;--glow:#201f1c;--ink:#ece8e0;--muted:#9a958a;--line:#2b2a26;--accent:#9db8a4;--accent-ink:#151513;--panel:#1b1a17;--scrim:rgba(21,21,19,.8);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#151513;--glow:#201f1c;--ink:#ece8e0;--muted:#9a958a;--line:#2b2a26;--accent:#9db8a4;--accent-ink:#151513;--panel:#1b1a17;--scrim:rgba(21,21,19,.8);color-scheme:dark}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(70% 70% at 74% 45%,var(--glow),var(--bg)) fixed,var(--bg);color:var(--ink);font:400 17px/1.65 Manrope,"Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:Fraunces,Georgia,"Times New Roman",serif;font-weight:500;line-height:1.05;letter-spacing:-.02em;margin:0}
+h1 em,h2 em{font-style:italic;color:var(--accent)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+[hidden]{display:none!important}
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;opacity:0;transition:opacity 1.6s ease;transform:translateZ(0)}
+.ready #gl{opacity:var(--glo,1)}
+#gl.nogl{display:none}
+#page{position:relative;z-index:1}
+header.top{position:fixed;top:0;left:0;right:0;z-index:20;padding:calc(22px + env(safe-area-inset-top,0px)) 32px 0;display:flex;justify-content:space-between;align-items:center}
+.brand{font:700 18px Fraunces,Georgia,serif}
+.link{background:none;border:0;border-bottom:1px solid var(--line);color:var(--muted);font:500 14px Manrope,Arial,sans-serif;padding:0 0 3px;cursor:pointer;transition:color .2s}
+.link:hover{color:var(--ink)}
+.btn{display:inline-block;border:0;cursor:pointer;background:var(--accent);color:var(--accent-ink);font:700 15px/1 Manrope,Arial,sans-serif;padding:18px 28px;border-radius:6px;text-decoration:none;transition:opacity .2s}
+.btn:hover{opacity:.88}
+.ghost{background:none;border:1px solid var(--line);color:var(--ink);border-radius:6px;padding:16px 22px;font:700 14px Manrope,Arial,sans-serif;cursor:pointer;text-decoration:none;display:inline-block}
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px}
+.scene{contain:layout paint;min-height:100vh;display:flex;align-items:center;padding:14vh 0 12vh}
+.col{max-width:530px}
+.eyebrow{font:500 12px Manrope,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+h1{font-size:clamp(44px,6.6vw,88px)}
+h2{font-size:clamp(34px,4.4vw,56px);margin-bottom:22px}
+.sub{font-size:19px;color:var(--muted);margin:26px 0 34px}
+.note{font-size:13px;color:var(--muted);margin-top:20px;max-width:30em}
+p.lead{color:var(--muted);margin:0 0 26px}
+.list{list-style:none;margin:0;padding:0}
+.list li{padding:18px 0;border-top:1px solid var(--line)}
+.list b{display:block;font:500 21px Fraunces,Georgia,serif;margin-bottom:4px}
+.list span{color:var(--muted);font-size:15px}
+.two h3{font-size:24px;margin:0 0 12px}
+.two ul{margin:0 0 30px;padding-left:18px}
+.two li{margin-bottom:8px}
+.two .not,.two .not li{color:var(--muted)}
+.steps{counter-reset:s;list-style:none;margin:0 0 24px;padding:0}
+.steps li{counter-increment:s;display:grid;grid-template-columns:44px 1fr;padding:16px 0;border-top:1px solid var(--line);color:var(--muted);font-size:15px}
+.steps li::before{content:"0" counter(s);font:500 18px Fraunces,Georgia,serif;color:var(--accent)}
+.steps b{display:block;color:var(--ink);font:500 20px Fraunces,Georgia,serif}
+.fine{font-size:13px;color:var(--muted)}
+footer{position:relative;z-index:1;padding:26px 32px calc(40px + env(safe-area-inset-bottom,0px));font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+.js .rv{opacity:0;transform:translateY(18px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.js .rv.in{opacity:1;transform:none}
+#scrim{position:fixed;inset:0;z-index:40;background:linear-gradient(90deg,var(--scrim),transparent 85%);opacity:0;pointer-events:none;transition:opacity .6s}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:min(520px,100%);z-index:50;background:var(--panel);transform:translateX(-102%);visibility:hidden;transition:transform .7s cubic-bezier(.2,.7,.2,1),visibility 0s .7s;overflow:auto;padding:calc(84px + env(safe-area-inset-top,0px)) 40px calc(60px + env(safe-area-inset-bottom,0px));border-right:1px solid var(--line)}
+.open #scrim{opacity:1;pointer-events:auto}
+.open #drawer{transform:none;visibility:visible;transition:transform .7s cubic-bezier(.2,.7,.2,1)}
+#drawer h2{font-size:38px;margin-bottom:10px}
+#drawer .x{position:absolute;right:22px;top:calc(18px + env(safe-area-inset-top,0px));background:none;border:0;color:var(--muted);font-size:30px;cursor:pointer;line-height:1}
+.f label.l{display:block;font:700 11px Manrope,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:24px 0 2px}
+.f input[type=text],.f input[type=email],.f select,.f textarea{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;color:var(--ink);font:400 17px Manrope,Arial,sans-serif;padding:10px 0}
+.f textarea{min-height:72px;resize:vertical}
+.f input:focus,.f select:focus,.f textarea:focus{outline:0;border-bottom-color:var(--accent)}
+.f select option{background:var(--panel);color:var(--ink)}
+.f fieldset{border:0;padding:0;margin:30px 0 0}
+.f legend{font:700 11px Manrope,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);padding:0;margin-bottom:6px}
+.ck{display:grid;grid-template-columns:22px 1fr;gap:10px;font-size:14px;color:var(--muted);padding:9px 0;cursor:pointer}
+.ck input{accent-color:var(--accent);width:17px;height:17px;margin-top:3px}
+.row2{display:flex;gap:12px;align-items:center;margin-top:30px;flex-wrap:wrap}
+#out{width:100%;min-height:200px;margin-top:16px;background:var(--bg);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:400 13px/1.55 Manrope,Arial,sans-serif;padding:14px}
+@media (max-width:860px){
+  :root{--glo:.5}
+  .scene{background:linear-gradient(90deg,var(--scrim),transparent)}
+  #drawer{padding-left:24px;padding-right:24px}
+  header.top{padding-left:20px;padding-right:20px}.wrap{padding:0 20px}
+}
+@media (prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none;transition:none}#gl{transition:none}}
+</style>
+
+<script>
+/* Browser-safe Supabase publishable configuration. RLS must protect the table. */
+var SUPABASE_URL = 'https://ldvioshnuyphfuvejidl.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_1FNS4LiAcRBtwHtDC3embg_proho_A5';
+</script>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="page">
+<header class="top"><div class="brand">Sovereign B2B MCP</div><button class="link" type="button" data-open>Request access</button></header>
+<main>
+<section class="scene"><div class="wrap"><div class="col">
+  <div class="eyebrow rv">Invite-only · MCP on Cloudflare Workers</div>
+  <h1 class="rv">Private MCP infrastructure, built for people who want <em>control.</em></h1>
+  <p class="sub rv">An invite-only, authenticated MCP server with queued jobs, persistent records and semantic search. Nothing is delivered without your approval.</p>
+  <div class="rv"><button class="btn" type="button" data-open>Request access</button>
+  <p class="note">Each request is reviewed by a person. If payment applies, the price and access period are shared before anything is due, and payment is verified by hand.</p></div>
+</div></div></section>
+
+<section class="scene"><div class="wrap"><div class="col">
+  <h2 class="rv">Scripts break. <em>Records</em> and approvals don’t.</h2>
+  <p class="lead rv">MCP automations often begin as a script that works on one machine. Then you need to know who can call it, what happens when a job stops halfway, and what actually ran.</p>
+  <ul class="list rv">
+    <li><b>Authenticated MCP access</b><span>An MCP server on Cloudflare Workers that only approved users can reach. No public endpoint is posted.</span></li>
+    <li><b>Jobs that persist</b><span>Asynchronous processing through Cloudflare Queues, with job and revenue records kept in Durable Objects.</span></li>
+    <li><b>Search by meaning</b><span>Semantic search using Cloudflare Workers AI embeddings and Vectorize.</span></li>
+  </ul>
+</div></div></section>
+
+<section class="scene"><div class="wrap"><div class="col">
+  <h2 class="rv">Humans decide what <em>leaves</em> the building.</h2>
+  <p class="lead rv">External email and social publishing are disabled by default. Delivery actions need explicit human approval. Credentials are never shared publicly; access details go privately to approved users.</p>
+  <p class="lead rv">Indexing approved GitHub repositories and Google Drive repository archives is planned through a controlled ingestion process. It is not yet available to every user.</p>
+</div></div></section>
+
+<section class="scene"><div class="wrap"><div class="col two">
+  <h2 class="rv">Is it for you?</h2>
+  <div class="rv"><h3>Who it’s for</h3>
+  <ul><li>Developers building MCP-based AI automations</li><li>Cloudflare Workers developers</li><li>Technical founders and indie hackers</li><li>Small SEO, research and content agencies</li><li>Teams who want controlled search over approved repositories</li></ul>
+  <div class="not"><h3>Who it’s not for</h3>
+  <ul><li>Anyone looking for income, automatic profits, viral growth or referral payouts. None are promised.</li><li>Anyone who wants an open endpoint without approval</li><li>Anyone who wants unattended email or social publishing</li></ul></div></div>
+</div></div></section>
+
+<section class="scene"><div class="wrap"><div class="col">
+  <h2 class="rv">How <em>access</em> works.</h2>
+  <ol class="steps rv">
+    <li><div><b>Request access</b>Tell us what you build and what you’d like to search.</div></li>
+    <li><div><b>Manual review</b>A person decides whether it’s a fit. Nothing is automatic.</div></li>
+    <li><div><b>Private details</b>Approved users receive access details privately, never in public.</div></li>
+    <li><div><b>Payment, if offered</b>The operator verifies it manually.</div></li>
+  </ol>
+  <p class="fine rv">An invite means you were approved. A payment confirmation means the operator manually verified a payment. One doesn’t imply the other.</p>
+</div></div></section>
+
+<section class="scene"><div class="wrap"><div class="col">
+  <h2 class="rv">Think it fits? <em>Ask</em> for access.</h2>
+  <p class="lead rv">A short form, a human reply, no pressure. If it isn’t right for you, that’s a fine answer too.</p>
+  <div class="rv"><button class="btn" type="button" data-open>Request access</button></div>
+</div></div></section>
+</main>
+<footer>Sovereign B2B MCP is invite-only. It does not guarantee income, automatic profits, viral growth or referral payouts.</footer>
+</div>
+
+<div id="scrim"></div>
+<aside id="drawer" role="dialog" aria-modal="true" aria-labelledby="req-t" aria-hidden="true">
+  <button class="x" type="button" aria-label="Close" data-close>&times;</button>
+  <form id="reqform" class="f" novalidate>
+    <h2 id="req-t">Request <em>access</em></h2>
+    <p class="fine">A person reads every request. Nothing is approved automatically.</p>
+    <label class="l" for="f-name">Your name</label><input id="f-name" type="text" autocomplete="name" data-shot="1">
+    <label class="l" for="f-email">Email for the reply</label><input id="f-email" type="email" autocomplete="email" data-shot="2">
+    <label class="l" for="f-role">Which describes you best?</label>
+    <select id="f-role" data-shot="3"><option>AI automation developer (MCP)</option><option>Cloudflare Workers developer</option><option>Technical founder or indie hacker</option><option>Small SEO, research or content agency</option><option>Other</option></select>
+    <label class="l" for="f-build">What are you building?</label><textarea id="f-build" data-shot="4"></textarea>
+    <label class="l" for="f-search">What would you want to search or process?</label><input id="f-search" type="text" data-shot="3">
+    <fieldset data-shot="2"><legend>Ground rules</legend>
+      <label class="ck"><input type="checkbox" class="cmp"><span>I won’t share passwords, tokens or keys in this request.</span></label>
+      <label class="ck"><input type="checkbox" class="cmp"><span>I understand access is invite-only and manually approved.</span></label>
+      <label class="ck"><input type="checkbox" class="cmp"><span>I understand no income, profit or growth is promised, and any payment is verified manually.</span></label>
+    </fieldset>
+    <p class="fine" id="err" role="alert"></p>
+    <div class="row2"><button class="btn" type="submit">Prepare my request</button><button class="ghost" type="button" data-close>Cancel</button></div>
+  </form>
+  <div id="reqdone" hidden>
+    <h2>Request <em>ready.</em></h2>
+    <p class="fine" id="donemsg"></p>
+    <textarea id="out" readonly aria-label="Your access request"></textarea>
+    <div class="row2"><a class="btn" id="mailbtn" href="#" hidden>Open in email app</a><button class="ghost" type="button" id="copybtn">Copy request</button><button class="ghost" type="button" data-close>Close</button></div>
+    <p class="fine" id="copied" role="status"></p>
+  </div>
+</aside>
+
+<script>
+/* Set the operator’s email here. Requests are sent by the visitor from their own email app. */
+var CONTACT_EMAIL="";
+(function(){
+var H=document.documentElement,page=document.getElementById('page'),drawer=document.getElementById('drawer'),form=document.getElementById('reqform'),done=document.getElementById('reqdone'),out=document.getElementById('out');
+var still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* camera shots: group x, y, z, rotation y, rotation x */
+var K=[[2.7,-.2,0,-.4,.04,0],[2.9,-.1,.6,-.75,.08,1],[2.2,.8,3,.3,-.06,.15],[3,0,-1.2,.7,.04,.35],[2.4,.5,3,-.1,0,0],[3,-.2,-.4,-.4,.03,0],[2.5,-.1,1.4,-.6,.03,0]];
+var formShot=null,ledMix=1,ledBoost=0,trig=null,wake=function(){};
+var rv=document.querySelectorAll('.rv');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.15});rv.forEach(function(n){io.observe(n);});}else{rv.forEach(function(n){n.classList.add('in');});}
+function shot(n){formShot=n;wake();}
+function openReq(e){trig=e&&e.currentTarget;form.hidden=false;done.hidden=true;document.getElementById('err').textContent='';
+  H.classList.add('open');drawer.setAttribute('aria-hidden','false');page.inert=true;document.body.style.overflow='hidden';
+  ledMix=0;form.querySelectorAll('.cmp').forEach(function(c){c.checked=false;});shot(1);
+  setTimeout(function(){document.getElementById('f-name').focus({preventScroll:true});},500);}
+function closeReq(){H.classList.remove('open');drawer.setAttribute('aria-hidden','true');page.inert=false;document.body.style.overflow='';
+  formShot=null;ledMix=1;wake();if(trig)trig.focus({preventScroll:true});}
+document.querySelectorAll('[data-open]').forEach(function(b){b.addEventListener('click',openReq);});
+document.querySelectorAll('[data-close]').forEach(function(b){b.addEventListener('click',closeReq);});
+document.getElementById('scrim').addEventListener('click',closeReq);
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&H.classList.contains('open'))closeReq();});
+form.addEventListener('focusin',function(e){var t=e.target.closest('[data-shot]');if(t)shot(+t.getAttribute('data-shot'));});
+form.addEventListener('change',function(e){if(e.target.classList.contains('cmp')){ledMix=form.querySelectorAll('.cmp:checked').length/3;ledBoost=1;shot(2);}});
+form.addEventListener('submit',function(e){
+  e.preventDefault();
+  var v=function(id){return document.getElementById(id).value.trim();};
+  var bad=['f-name','f-email','f-build'].filter(function(id){var el=document.getElementById(id);return !el.value.trim()||!el.checkValidity();});
+  var err=document.getElementById('err');
+  if(bad.length){err.textContent='Please complete your name, a valid email and what you’re building.';document.getElementById(bad[0]).focus();return;}
+  if(form.querySelectorAll('.cmp:checked').length<3){err.textContent='Please confirm all three ground rules.';return;}
+  var txt='Access request: Sovereign B2B MCP\n\nName: '+v('f-name')+'\nReply email: '+v('f-email')+'\nRole: '+v('f-role')+'\n\nWhat I’m building:\n'+v('f-build')+'\n\nWhat I’d want to search or process:\n'+(v('f-search')||'Not specified')+'\n\nConfirmed: no secrets shared; invite-only and manually approved; no income or growth promised; any payment verified manually.';
+  var record={name:v('f-name'),email:v('f-email').toLowerCase(),role:v('f-role'),clients:[],uses:v('f-search'),plan:'interest',invite_code:null,source:'landing'};
+  var save=fetch(SUPABASE_URL.replace(/\/+$/,'')+'/rest/v1/preorders',{method:'POST',headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(record)});
+  save.then(function(r){if(!r.ok)throw new Error('save failed');out.value=txt;form.hidden=true;done.hidden=false;drawer.scrollTop=0;var mb=document.getElementById('mailbtn'),msg=document.getElementById('donemsg');
+  if(CONTACT_EMAIL){mb.hidden=false;mb.href='mailto:'+CONTACT_EMAIL+'?subject='+encodeURIComponent('Access request: Sovereign B2B MCP')+'&body='+encodeURIComponent(txt);msg.textContent='Nothing has been sent yet. Open it in your email app, or copy it and send it to '+CONTACT_EMAIL+'.';}
+  else{mb.hidden=true;msg.textContent='Your request was saved. Nothing was sent automatically; the operator will review it manually.';}
+  ledMix=1;ledBoost=1.6;shot(6);
+  }).catch(function(){err.textContent='Could not save your request. Please try again in a moment.';});
+});
+document.getElementById('copybtn').addEventListener('click',function(){
+  var c=document.getElementById('copied');function ok(){c.textContent='Copied.';}
+  function fb(){out.focus();out.select();try{document.execCommand('copy')?ok():c.textContent='Select the text and copy it manually.';}catch(x){c.textContent='Select the text and copy it manually.';}}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(out.value).then(ok,fb);}else{fb();}
+});
+
+/* 3D: one object. Camera and an exploded-view of its layers are scrubbed by scroll along a smooth spline. */
+var cv=document.getElementById('gl'),scenes=document.querySelectorAll('.scene'),R,scene,cam,G,led,ring,lens,lab,plates=[],lt,lx,cA,cB,raf=0,prev=0,ready=false,mx=0,my=0,cmx=0,cmy=0,cen=[],slow=0,t0=0;
+var prMax=Math.min(window.devicePixelRatio||1,2),pr=1,S=K[0].slice(),T=[0,0,0,0,0,0];
+function capPR(){return Math.max(1,Math.min(prMax,Math.sqrt(8.3e6/(innerWidth*innerHeight))));}
+function apply(){R.setPixelRatio(pr);R.setSize(innerWidth,innerHeight,false);}
+function label(){lx.clearRect(0,0,2048,1024);lx.textAlign='center';lx.fillStyle='rgba(224,228,231,.92)';lx.font='600 160px Fraunces,Georgia,serif';lx.fillText('Sovereign',1024,400);lx.fillStyle='rgba(160,168,175,.92)';lx.font='500 88px Manrope,Arial,sans-serif';lx.fillText('B2B MCP',1024,550);lx.font='500 52px Manrope,Arial,sans-serif';lx.fillText('INVITE ONLY  \u00b7  HUMAN APPROVED',1024,800);lt.needsUpdate=true;}
+function measure(){cen=[].map.call(scenes,function(s){var r=s.getBoundingClientRect();return r.top+window.scrollY+r.height/2;});}
+function cr(a,b,c,d,t){var t2=t*t,t3=t2*t;return .5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t2+(-a+3*b-3*c+d)*t3);}
+function sample(u,o){var i=Math.min(4,Math.max(0,Math.floor(u))),f=u-i,a=K[Math.max(0,i-1)],b=K[i],c=K[i+1],d=K[Math.min(5,i+2)];for(var j=0;j<6;j++)o[j]=cr(a[j],b[j],c[j],d[j],f);return o;}
+function getU(){var y=window.scrollY+innerHeight*.5,n=cen.length;if(!n||y<=cen[0])return 0;if(y>=cen[n-1])return n-1;var i=0;while(i<n-2&&y>=cen[i+1])i++;return i+(y-cen[i])/(cen[i+1]-cen[i]);}
+function frame(t){
+  if(!ready)return false;
+  var dt=Math.min(Math.max((t-prev)/1000,.001),.05);prev=t;
+  var tg=formShot!==null?K[formShot]:sample(getU(),T);
+  var mob=innerWidth<860,asp=innerWidth/innerHeight,i,d=0,k=still?1:1-Math.exp(-dt*5.5);
+  for(i=0;i<6;i++){var v=tg[i];if(i===0){v=mob?0:v*Math.min(1,asp/1.6);}else if(mob){if(i===1)v+=1.5;else if(i===2)v-=1.6;}var dd=v-S[i];S[i]+=dd*k;d+=Math.abs(dd);}
+  var px=mx-cmx,py=my-cmy;cmx+=px*k*.6;cmy+=py*k*.6;d+=Math.abs(px)+Math.abs(py);
+  var e=still?1:Math.min((t-t0)/2400,1),ee=1-Math.pow(1-e,3);if(e<1)d+=1;
+  G.scale.setScalar(.9+.1*ee);
+  G.position.set(S[0],S[1],S[2]);G.rotation.set(S[4]+cmy*.25,S[3]+cmx*.3+(1-ee)*.7,0);
+  var ex=S[5];
+  plates[0].position.set(ex*.28,-ex*.07,-(.2+ex*.75));plates[1].position.set(ex*.55,-ex*.14,-(.4+ex*1.5));
+  ring.position.z=.2+ex*1;lens.position.z=.19+ex*.85;led.position.z=.21+ex*.45;lab.position.z=.212+ex*.25;
+  ledBoost*=Math.exp(-dt*3);var m=led.material;m.emissive.copy(cA).lerp(cB,ledMix);m.emissiveIntensity=1.1+ledBoost;
+  R.render(scene,cam);
+  if(!still&&dt>.028){slow++;if(slow>8&&pr>1){pr=Math.max(1,pr-.25);apply();slow=0;}}else slow=0;
+  return d>.0015||ledBoost>.02;
+}
+function tick(t){raf=0;if(frame(t))raf=requestAnimationFrame(tick);}
+wake=function(){if(ready&&!raf&&!document.hidden){prev=performance.now()-16;raf=requestAnimationFrame(tick);}};
+function size(){measure();if(!ready)return;pr=Math.min(pr,capPR());apply();cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();frame(performance.now());}
+function init(){
+try{
+if(typeof THREE==='undefined')throw 0;
+cA=new THREE.Color(0x8a8f93);cB=new THREE.Color(0x9db8a4);
+pr=capPR();
+R=new THREE.WebGLRenderer({canvas:cv,antialias:pr<1.75,alpha:true,powerPreference:'high-performance'});
+R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1;
+scene=new THREE.Scene();cam=new THREE.PerspectiveCamera(28,1,.1,100);cam.position.set(0,.3,12);
+var env=new THREE.Scene();env.background=new THREE.Color(0x14161a);
+function sb(w,h,x,y,z,c,i){var m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(i),side:THREE.DoubleSide}));m.position.set(x,y,z);m.lookAt(0,0,0);env.add(m);}
+sb(10,3.4,0,7,3,0xfff6ea,6);sb(2.4,9,-8,1,3,0xffffff,4);sb(2,7,8,0,2,0xf2ece2,2.6);sb(10,1.4,0,-6,4,0xffffff,1.2);sb(7,7,0,1,-9,0xffffff,1.6);
+var pm=new THREE.PMREMGenerator(R);scene.environment=pm.fromScene(env,.04).texture;pm.dispose();
+var an=Math.min(8,R.capabilities.getMaxAnisotropy());
+var c=document.createElement('canvas');c.width=c.height=512;var x=c.getContext('2d');x.fillStyle='#808080';x.fillRect(0,0,512,512);
+for(var i=0;i<2400;i++){var g=110+Math.random()*60|0;x.fillStyle='rgba('+g+','+g+','+g+',.5)';x.fillRect(0,Math.random()*512,512,Math.random()*1.4+.3);}
+var brush=new THREE.CanvasTexture(c);brush.wrapS=brush.wrapT=THREE.RepeatWrapping;brush.repeat.set(.32,.26);brush.anisotropy=an;
+var w=3.2,h=4.5,r=.4,s=new THREE.Shape();
+s.moveTo(-w/2+r,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);
+s.lineTo(-w/2+r,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,-h/2+r);s.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);
+var geo=new THREE.ExtrudeGeometry(s,{depth:.28,bevelEnabled:true,bevelThickness:.07,bevelSize:.07,bevelSegments:6,curveSegments:24});geo.translate(0,0,-.14);
+G=new THREE.Group();
+G.add(new THREE.Mesh(geo,new THREE.MeshPhysicalMaterial({color:0x34383c,metalness:1,roughness:.38,bumpMap:brush,bumpScale:.45,clearcoat:.3,clearcoatRoughness:.35,envMapIntensity:1.1})));
+var pmat=new THREE.MeshStandardMaterial({color:0x272a2d,metalness:1,roughness:.45,bumpMap:brush,bumpScale:.4,envMapIntensity:.9});
+for(i=0;i<2;i++){var pp=new THREE.Mesh(geo,pmat);pp.scale.set(.97-i*.03,.97-i*.03,.5);G.add(pp);plates.push(pp);}
+ring=new THREE.Mesh(new THREE.TorusGeometry(.78,.09,32,120),new THREE.MeshStandardMaterial({color:0xc4c6c6,metalness:1,roughness:.22}));ring.position.set(0,.75,.2);G.add(ring);
+lens=new THREE.Mesh(new THREE.CylinderGeometry(.7,.7,.05,96),new THREE.MeshPhysicalMaterial({color:0x07090a,metalness:.1,roughness:.05,clearcoat:1,clearcoatRoughness:.04}));lens.rotation.x=Math.PI/2;lens.position.set(0,.75,.19);G.add(lens);
+led=new THREE.Mesh(new THREE.BoxGeometry(1.3,.05,.03),new THREE.MeshStandardMaterial({color:0x1a1d1c,emissive:0x9db8a4,emissiveIntensity:1.1}));led.position.set(0,-1.2,.21);G.add(led);
+var lc=document.createElement('canvas');lc.width=2048;lc.height=1024;lx=lc.getContext('2d');lt=new THREE.CanvasTexture(lc);lt.anisotropy=an;label();
+lab=new THREE.Mesh(new THREE.PlaneGeometry(2.6,1.3),new THREE.MeshBasicMaterial({map:lt,transparent:true}));lab.position.set(0,-.62,.212);G.add(lab);
+var sc=document.createElement('canvas');sc.width=sc.height=128;var sx=sc.getContext('2d');var gr=sx.createRadialGradient(64,64,0,64,64,64);gr.addColorStop(0,'rgba(20,18,14,.38)');gr.addColorStop(1,'rgba(20,18,14,0)');sx.fillStyle=gr;sx.fillRect(0,0,128,128);
+var sh=new THREE.Mesh(new THREE.PlaneGeometry(5,1.4),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sc),transparent:true,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.y=-2.9;G.add(sh);
+var key=new THREE.DirectionalLight(0xffffff,.4);key.position.set(3,5,6);scene.add(key);
+scene.add(G);
+t0=performance.now();ready=true;size();H.classList.add('ready');wake();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){label();wake();});
+}catch(err){cv.classList.add('nogl');}
+}
+window.addEventListener('scroll',function(){wake();},{passive:true});
+window.addEventListener('pointermove',function(e){mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5;wake();});
+document.addEventListener('visibilitychange',wake);
+var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(size,120);});
+function start(){measure();if('requestIdleCallback' in window)requestIdleCallback(init,{timeout:800});else setTimeout(init,60);}
+function boot(){var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';s.onload=start;s.onerror=function(){cv.classList.add('nogl');};document.head.appendChild(s);}
+if(document.readyState==='complete')boot();else window.addEventListener('load',boot);
+})();
+</script>
+</body>
+</html>

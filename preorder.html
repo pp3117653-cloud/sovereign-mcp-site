@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>You're invited: MCP server pre-order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#f8fafb;--sky:#d6e8f1;--ink:#12283a;--blue:#1f6f9f;--lemon:#f6d64a;--pink:#d94a7a;--leaf:#3f8a5a;--mute:#5d7285;--line:#cfdce5;
+--display:'Bricolage Grotesque','Trebuchet MS',sans-serif;--ui:'Instrument Sans','Helvetica Neue',Arial,sans-serif;box-sizing:border-box}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:17px;line-height:1.5;overflow-x:hidden}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.02;letter-spacing:-.02em}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 0}
+.logo{font-family:var(--display);font-weight:800;font-size:20px;display:flex;align-items:center;gap:10px}
+.logo i{width:14px;height:14px;border-radius:50%;background:var(--lemon);box-shadow:0 0 0 3px var(--ink) inset}
+.pill{background:#fff;border:1.5px solid var(--ink);border-radius:999px;padding:7px 16px;font-size:15px}
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:center;padding:30px 0 70px}
+@media(max-width:860px){.hero{grid-template-columns:1fr}}
+.hero h1{font-size:clamp(46px,7vw,88px);font-weight:800}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--lemon) 62%)}
+.lead{color:var(--mute);max-width:46ch;margin:22px 0 28px}
+.gate{display:flex;gap:10px;max-width:480px;flex-wrap:wrap}
+.gate input{flex:1 1 200px;border:2px solid var(--ink);background:#fff;border-radius:14px;padding:15px 18px;font-size:18px;letter-spacing:.12em;text-transform:uppercase}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:14px;padding:15px 26px;font-weight:600;cursor:pointer;transition:transform .15s,background .2s}
+.btn:hover{background:var(--blue);transform:translateY(-2px)}
+.btn:disabled{opacity:.5;cursor:wait;transform:none}
+.ghost{background:none;border:2px solid var(--ink);color:var(--ink)}
+.ghost:hover{background:var(--sky)}
+.msg{min-height:26px;margin-top:12px;font-size:15px;color:var(--pink)}
+.seats{margin-top:26px;max-width:480px}
+.seats div.bar{height:10px;background:var(--sky);border-radius:99px;overflow:hidden}
+.seats div.bar b{display:block;height:100%;width:0;background:var(--blue);border-radius:99px;transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.seats p{margin:8px 0 0;font-size:15px;color:var(--mute)}
+/* vector art */
+.art svg{width:100%;height:auto;display:block}
+.cloud{animation:drift 14s ease-in-out infinite alternate}.cloud.b{animation-duration:19s;animation-direction:alternate-reverse}
+@keyframes drift{to{transform:translateX(38px)}}
+.plug{animation:join 6s ease-in-out infinite}
+.sock{animation:joinr 6s ease-in-out infinite}
+@keyframes join{0%{transform:translateX(-70px)}28%,78%{transform:translateX(0)}100%{transform:translateX(-70px)}}
+@keyframes joinr{0%{transform:translateX(50px)}28%,78%{transform:translateX(0)}100%{transform:translateX(50px)}}
+.ring{transform-box:fill-box;transform-origin:center;opacity:0;animation:burst 6s ease-out infinite}
+.ring.r2{animation-delay:.25s}
+@keyframes burst{0%,26%{opacity:0;transform:scale(.3)}30%{opacity:1}60%{opacity:0;transform:scale(2.6)}100%{opacity:0}}
+.sun{animation:bob 5s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-8px)}}
+/* claim */
+#claim{padding:70px 0 90px;background:var(--sky);border-radius:44px 44px 0 0;display:none}
+#claim.on{display:block;animation:rise .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+.claim{display:grid;grid-template-columns:1.05fr 1fr;gap:44px;align-items:start}
+@media(max-width:900px){.claim{grid-template-columns:1fr}}
+.claim h2{font-size:clamp(34px,4.6vw,56px);font-weight:800}
+.claim .lead{margin-top:14px}
+.steps{display:flex;gap:8px;margin:26px 0 20px}
+.steps span{flex:1;height:6px;border-radius:9px;background:#fff;transition:background .3s}
+.steps span.on{background:var(--ink)}
+.card{background:#fff;border-radius:26px;padding:28px;border:2px solid var(--ink);box-shadow:8px 8px 0 var(--ink)}
+.step{display:none}.step.on{display:block;animation:rise .45s ease}
+label.f{display:block;font-weight:600;margin:16px 0 6px;font-size:15px}
+.in{width:100%;border:2px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;transition:border-color .2s}
+.in:focus{border-color:var(--blue);outline:none}
+textarea.in{min-height:92px;resize:vertical}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;cursor:pointer;transition:.18s;font-size:15px}
+.chip:hover{border-color:var(--blue)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff;transform:scale(1.04)}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:520px){.plans{grid-template-columns:1fr}}
+.plan{text-align:left;border:2px solid var(--line);background:#fff;border-radius:18px;padding:16px;cursor:pointer;transition:.2s}
+.plan b{font-family:var(--display);font-size:20px;display:block}
+.plan span{color:var(--mute);font-size:14px}
+.plan[aria-pressed="true"]{border-color:var(--ink);background:var(--lemon);transform:translateY(-3px)}
+.nav2{display:flex;justify-content:space-between;margin-top:24px;gap:10px}
+.err{color:var(--pink);font-size:14px;min-height:20px;margin-top:10px}
+.fine{font-size:13px;color:var(--mute);margin-top:14px}
+/* ticket */
+.ticket-wrap{position:sticky;top:24px;perspective:900px}
+.ticket{display:grid;grid-template-columns:1fr 112px;background:var(--lemon);border:2px solid var(--ink);border-radius:24px;position:relative;transform:rotate(-2deg);transition:transform .5s;box-shadow:8px 8px 0 var(--ink)}
+.ticket:hover{transform:rotate(0)}
+.ticket::before,.ticket::after{content:"";position:absolute;right:104px;width:24px;height:24px;border-radius:50%;background:var(--sky);border:2px solid var(--ink)}
+.ticket::before{top:-13px;clip-path:inset(50% 0 0 0)}.ticket::after{bottom:-13px;clip-path:inset(0 0 50% 0)}
+.tmain{padding:26px 24px;min-width:0}
+.tmain small{font-size:14px;color:#4b4300}
+.tname{font-family:var(--display);font-weight:800;font-size:clamp(28px,3.6vw,40px);line-height:1;margin:6px 0 14px;overflow-wrap:anywhere;min-height:1em}
+.tmeta{display:flex;flex-wrap:wrap;gap:6px;min-height:32px}
+.tmeta b{font-weight:600;font-size:13px;border:1.5px solid var(--ink);border-radius:99px;padding:3px 10px;background:#fff;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(0)}}
+.tcode{margin-top:18px;font-family:var(--display);font-weight:600;letter-spacing:.14em;font-size:15px}
+.tstub{border-left:2px dashed var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center}
+.tstub small{font-size:12px}
+.tstub .n{font-family:var(--display);font-weight:800;font-size:38px;line-height:1}
+.stamp{position:absolute;right:130px;bottom:22px;border:3px solid var(--pink);color:var(--pink);font-family:var(--display);font-weight:800;font-size:22px;padding:4px 14px;border-radius:10px;transform:rotate(-12deg) scale(2.4);opacity:0;pointer-events:none}
+.ticket.done .stamp{animation:stamp .55s cubic-bezier(.3,1.2,.5,1) forwards}
+@keyframes stamp{to{opacity:1;transform:rotate(-12deg) scale(1)}}
+.thanks{text-align:center;display:none;padding:10px 0}
+.thanks h3{font-size:30px;margin-bottom:8px}
+/* admin */
+#admin{display:none;padding:20px 0 80px}
+body.adm #admin{display:block}body.adm #pub{display:none}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:22px 0}
+@media(max-width:640px){.grid3{grid-template-columns:1fr}}
+.kpi{border-radius:22px;padding:20px;border:2px solid var(--ink)}
+.kpi b{font-family:var(--display);font-size:46px;display:block;line-height:1}
+.k1{background:var(--lemon)}.k2{background:var(--sky)}.k3{background:#f6d5df}
+.bars div{display:grid;grid-template-columns:120px 1fr 34px;gap:10px;align-items:center;margin:8px 0;font-size:15px}
+.bars i{display:block;height:14px;background:var(--blue);border-radius:99px;width:0;transition:width 1s}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:500}
+.scroll{overflow-x:auto}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.stamp{opacity:1!important;transform:rotate(-12deg)!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><div class="logo"><i></i><span id="brand"></span></div><span class="pill" id="navpill">Invite only</span></nav>
+
+<main id="pub">
+<section class="hero">
+  <div>
+    <h1>You're invited to plug in <em>first.</em></h1>
+    <p class="lead">Pre-orders are open to a small circle of people we handpicked. Enter your invite code to claim a seat and shape what we build next.</p>
+    <form class="gate" id="gate" autocomplete="off">
+      <input id="inv" placeholder="Invite code" maxlength="24" aria-label="Invite code" required>
+      <button class="btn" id="gbtn">Unlock my seat</button>
+    </form>
+    <div class="msg" id="gmsg" role="alert"></div>
+    <div class="seats"><div class="bar"><b id="bar"></b></div><p id="seatTxt">Counting seats…</p></div>
+  </div>
+  <div class="art">
+    <svg viewBox="0 0 480 400" role="img" aria-label="A plug sliding into a socket under a sun">
+      <circle cx="240" cy="210" r="178" fill="#d6e8f1"/>
+      <g class="sun"><circle cx="372" cy="92" r="40" fill="#f6d64a"/></g>
+      <g class="cloud"><ellipse cx="120" cy="104" rx="52" ry="16" fill="#fff"/><ellipse cx="150" cy="94" rx="30" ry="16" fill="#fff"/></g>
+      <g class="cloud b"><ellipse cx="350" cy="320" rx="46" ry="13" fill="#fff"/><ellipse cx="322" cy="312" rx="24" ry="12" fill="#fff"/></g>
+      <g class="plug">
+        <path d="M0 214 H92" stroke="#12283a" stroke-width="10" stroke-linecap="round" fill="none"/>
+        <rect x="90" y="176" width="104" height="76" rx="18" fill="#1f6f9f" stroke="#12283a" stroke-width="4"/>
+        <rect x="194" y="192" width="40" height="12" rx="4" fill="#12283a"/>
+        <rect x="194" y="226" width="40" height="12" rx="4" fill="#12283a"/>
+        <circle cx="124" cy="214" r="9" fill="#f6d64a"/>
+      </g>
+      <g class="sock">
+        <rect x="236" y="168" width="130" height="92" rx="20" fill="#fff" stroke="#12283a" stroke-width="4"/>
+        <rect x="246" y="192" width="30" height="12" rx="4" fill="#d94a7a"/>
+        <rect x="246" y="226" width="30" height="12" rx="4" fill="#d94a7a"/>
+        <path d="M366 214 H480" stroke="#12283a" stroke-width="10" stroke-linecap="round" fill="none"/>
+      </g>
+      <circle class="ring" cx="236" cy="214" r="34" fill="none" stroke="#f6d64a" stroke-width="5"/>
+      <circle class="ring r2" cx="236" cy="214" r="34" fill="none" stroke="#d94a7a" stroke-width="3"/>
+    </svg>
+  </div>
+</section>
+</main>
+</div>
+
+<section id="claim">
+<div class="wrap claim">
+  <div>
+    <h2>Claim your seat.</h2>
+    <p class="lead">Three quick steps. Your ticket on the right fills in as you go, so you can see exactly what you're reserving.</p>
+    <div class="steps" id="dots"><span class="on"></span><span></span><span></span></div>
+    <div class="card">
+      <form id="form" novalidate>
+        <div class="step on">
+          <label class="f" for="name">Your name</label><input class="in" id="name" maxlength="40" autocomplete="name">
+          <label class="f" for="email">Email for your build access</label><input class="in" id="email" type="email" autocomplete="email">
+          <label class="f">What do you do?</label>
+          <div class="chips" data-single="role"><button type="button" class="chip">Developer</button><button type="button" class="chip">Founder</button><button type="button" class="chip">Designer</button><button type="button" class="chip">Data / Ops</button><button type="button" class="chip">Something else</button></div>
+        </div>
+        <div class="step">
+          <label class="f">Where will you plug it in?</label>
+          <div class="chips" data-multi="clients"><button type="button" class="chip">Claude Desktop</button><button type="button" class="chip">Claude Code</button><button type="button" class="chip">Cursor</button><button type="button" class="chip">VS Code</button><button type="button" class="chip">Windsurf</button><button type="button" class="chip">Other</button></div>
+          <label class="f" for="uses">What's the first thing you'd connect?</label>
+          <textarea class="in" id="uses" maxlength="300" placeholder="Our Postgres database, Linear tickets, a folder of contracts…"></textarea>
+        </div>
+        <div class="step">
+          <label class="f">Pick your seat</label>
+          <div class="plans" id="plans"></div>
+          <p class="fine">Reserving is free to start. We'll email you before anything is charged.</p>
+        </div>
+        <div class="err" id="err" role="alert"></div>
+        <div class="nav2"><button type="button" class="btn ghost" id="back" style="visibility:hidden">Back</button><button type="button" class="btn" id="next">Continue</button></div>
+      </form>
+      <div class="thanks" id="thanks"><h3>Seat confirmed.</h3><p>Check your email soon. Your invite code is now tied to this seat, so keep it close.</p></div>
+    </div>
+  </div>
+  <div class="ticket-wrap">
+    <div class="ticket" id="ticket">
+      <div class="tmain"><small id="tbrand"></small><div class="tname" id="tname">Your name here</div><div class="tmeta" id="tmeta"></div><div class="tcode" id="tcode"></div></div>
+      <div class="tstub"><small>Seat</small><div class="n" id="tseat">#--</div><small id="tplan">Solo</small></div>
+      <div class="stamp">CONFIRMED</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<div class="wrap" id="admin">
+  <nav><div class="logo"><i></i>Pre-orders</div><a class="pill" href="#" onclick="location.hash='';location.reload();return false">Back to site</a></nav>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;max-width:560px"><input class="in" id="akey" type="password" placeholder="Service or admin key (stays in memory only)" style="flex:1 1 240px"><button class="btn" id="aload">Load pre-orders</button></div>
+  <div class="err" id="aerr"></div>
+  <div class="grid3"><div class="kpi k1"><b id="k1">0</b>Pre-orders</div><div class="kpi k2"><b id="k2">0</b>Team seats</div><div class="kpi k3"><b id="k3">0</b>Left of <span id="cap"></span></div></div>
+  <h3 style="margin:30px 0 8px">Where they'll plug it in</h3><div class="bars" id="bars"></div>
+  <h3 style="margin:30px 0 8px">Latest requests</h3><div class="scroll"><table><thead><tr><th>Name</th><th>Role</th><th>Plan</th><th>First connection</th><th>When</th></tr></thead><tbody id="rows"></tbody></table></div>
+</div>
+
+<script>
+/* ---- Edit these ---- */
+var CONFIG={
+  url:'https://ldvioshnuyphfuvejidl.supabase.co',
+  anon:'sb_publishable_1FNS4LiAcRBtwHtDC3embg_proho_A5',
+  name:'Your MCP Server',
+  capacity:100,
+  plans:{solo:{label:'Solo seat',blurb:'One builder',price:''},team:{label:'Team seat',blurb:'Up to 5 people',price:''}}
+};
+/* -------------------- */
+(function(){
+var $=function(i){return document.getElementById(i)};
+var live=!!(CONFIG.url&&CONFIG.anon);
+var S={invite:'',role:'',clients:[],plan:'solo',seat:0,step:0};
+$('brand').textContent=CONFIG.name;$('tbrand').textContent=CONFIG.name+' · founding seat';$('cap').textContent=CONFIG.capacity;
+
+function api(path,opt,key){
+  opt=opt||{};var k=key||CONFIG.anon;
+  opt.headers=Object.assign({apikey:k,Authorization:'Bearer '+k,'Content-Type':'application/json'},opt.headers||{});
+  return fetch(CONFIG.url.replace(/\/+$/,'')+'/rest/v1/'+path,opt).then(function(r){
+    if(!r.ok)throw new Error('Request failed ('+r.status+')');
+    return r.status===204?null:r.text().then(function(t){return t?JSON.parse(t):null})})
+}
+function setSeats(n){
+  var left=Math.max(0,CONFIG.capacity-n);S.seat=n+1;
+  setTimeout(function(){$('bar').style.width=Math.min(100,n/CONFIG.capacity*100)+'%'},200);
+  $('seatTxt').textContent=left>0?n+' of '+CONFIG.capacity+' seats claimed. '+left+' left.':'Every seat is claimed. Join the waitlist below.';
+  $('tseat').textContent='#'+String(S.seat).padStart(3,'0')
+}
+(live?api('rpc/seats_claimed',{method:'POST',body:'{}'}):Promise.resolve(37)).then(function(n){setSeats(+n||0)}).catch(function(){setSeats(0);$('seatTxt').textContent='Seats are limited.'});
+
+/* gate */
+$('gate').onsubmit=function(e){
+  e.preventDefault();var c=$('inv').value.trim().toUpperCase();if(c.length<4){$('gmsg').textContent='Invite codes have at least 4 characters.';return}
+  $('gbtn').disabled=true;$('gmsg').textContent='';
+  (live?api('rpc/check_invite',{method:'POST',body:JSON.stringify({code:c})}):Promise.resolve(true)).then(function(ok){
+    if(ok!==true){$('gmsg').textContent='That code is not on the list. Check it and try again.';return}
+    S.invite=c;$('tcode').textContent='Invite '+c;$('navpill').textContent='Invite accepted';
+    $('claim').className='on';setTimeout(function(){$('claim').scrollIntoView({behavior:'smooth'})},80)
+  }).catch(function(){$('gmsg').textContent='Could not check your code. Try again in a moment.'}).then(function(){$('gbtn').disabled=false})
+};
+
+/* plans */
+Object.keys(CONFIG.plans).forEach(function(k){var p=CONFIG.plans[k],b=document.createElement('button');b.type='button';b.className='plan';b.dataset.k=k;b.setAttribute('aria-pressed',k===S.plan);
+  b.innerHTML='<b></b><span></span>';b.firstChild.textContent=p.label+(p.price?' · '+p.price:'');b.lastChild.textContent=p.blurb;
+  b.onclick=function(){S.plan=k;[].forEach.call($('plans').children,function(x){x.setAttribute('aria-pressed',x.dataset.k===k)});$('tplan').textContent=p.label.replace(' seat','')};$('plans').appendChild(b)});
+
+/* chips */
+function meta(){var m=$('tmeta');m.innerHTML='';(S.role?[S.role]:[]).concat(S.clients).forEach(function(t){var b=document.createElement('b');b.textContent=t;m.appendChild(b)})}
+[].forEach.call(document.querySelectorAll('.chips'),function(g){g.onclick=function(e){var b=e.target.closest('.chip');if(!b)return;
+  if(g.dataset.single){[].forEach.call(g.children,function(x){x.setAttribute('aria-pressed','false')});b.setAttribute('aria-pressed','true');S.role=b.textContent}
+  else{var on=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',on);var t=b.textContent;S.clients=S.clients.filter(function(x){return x!==t});if(on)S.clients.push(t)}
+  meta()}});
+$('name').oninput=function(){$('tname').textContent=this.value.trim()||'Your name here'};
+
+/* steps */
+var steps=document.querySelectorAll('.step'),dots=$('dots').children;
+function show(n){S.step=n;[].forEach.call(steps,function(s,i){s.className='step'+(i===n?' on':'')});[].forEach.call(dots,function(d,i){d.className=i<=n?'on':''});
+  $('back').style.visibility=n?'visible':'hidden';$('next').textContent=n===2?'Reserve my seat':'Continue';$('err').textContent=''}
+function valid(){
+  if(S.step===0){if($('name').value.trim().length<2)return 'Tell us your name.';if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test($('email').value.trim()))return 'Enter a valid email address.';if(!S.role)return 'Pick what you do.'}
+  if(S.step===1&&!S.clients.length)return 'Pick at least one place you will use it.';
+  return ''}
+$('back').onclick=function(){show(S.step-1)};
+$('next').onclick=function(){
+  var e=valid();if(e){$('err').textContent=e;return}
+  if(S.step<2){show(S.step+1);return}
+  var row={name:$('name').value.trim(),email:$('email').value.trim().toLowerCase(),role:S.role,clients:S.clients,uses:$('uses').value.trim(),plan:S.plan,invite_code:S.invite};
+  $('next').disabled=true;$('next').textContent='Reserving…';
+  (live?api('preorders',{method:'POST',body:JSON.stringify(row),headers:{Prefer:'return=minimal'}}):Promise.resolve()).then(function(){
+    $('form').style.display='none';$('thanks').style.display='block';$('ticket').classList.add('done');$('dots').style.opacity=.4
+  }).catch(function(err){$('err').textContent=/409/.test(err.message)?'This email or invite code has already reserved a seat.':'Something went wrong. Please try again.';$('next').textContent='Reserve my seat'}).then(function(){$('next').disabled=false})
+};
+
+/* admin */
+function admin(){
+  if(location.hash!=='#admin')return;document.body.classList.add('adm');
+  $('aload').onclick=function(){
+    if(!live){$('aerr').textContent='Add your Supabase URL in CONFIG first.';return}
+    $('aerr').textContent='';
+    api('preorders?select=*&order=created_at.desc&limit=500',{},$('akey').value.trim()).then(function(rows){
+      rows=rows||[];$('k1').textContent=rows.length;$('k2').textContent=rows.filter(function(r){return r.plan==='team'}).length;$('k3').textContent=Math.max(0,CONFIG.capacity-rows.length);
+      var cnt={};rows.forEach(function(r){(r.clients||[]).forEach(function(c){cnt[c]=(cnt[c]||0)+1})});
+      var max=Math.max.apply(null,Object.values(cnt).concat([1]));$('bars').innerHTML='';
+      Object.keys(cnt).sort(function(a,b){return cnt[b]-cnt[a]}).forEach(function(c){var d=document.createElement('div');d.innerHTML='<span></span><div style="display:block;margin:0"><i></i></div><b></b>';d.children[0].textContent=c;d.children[2].textContent=cnt[c];$('bars').appendChild(d);var i=d.querySelector('i');setTimeout(function(){i.style.width=cnt[c]/max*100+'%'},50)});
+      $('rows').innerHTML='';rows.slice(0,50).forEach(function(r){var tr=document.createElement('tr');[r.name,r.role,r.plan,r.uses||'–',new Date(r.created_at).toLocaleDateString()].forEach(function(v){var td=document.createElement('td');td.textContent=v;tr.appendChild(td)});$('rows').appendChild(tr)})
+    }).catch(function(e){$('aerr').textContent='Could not load. Use a key allowed to read preorders. '+e.message})}
+}
+admin();
+})();
+</script>
+</body>
+</html>
